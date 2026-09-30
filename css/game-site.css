@@ -792,6 +792,78 @@ body.play-full .cw-navbar { display: none !important; }
 }
 
 /* ============================================================
+   HALF-SCREEN WINNER & STREAK MILESTONE OVERLAY
+   Fits exact middle gameplay section for Web & TikTok Live
+   ============================================================ */
+.cw-winner-half-card {
+  position: absolute;
+  top: 26%;
+  left: 12px;
+  right: 12px;
+  height: 250px;
+  z-index: 100;
+  background: radial-gradient(circle at 50% 15%, rgba(255, 157, 60, 0.4), transparent 70%),
+              linear-gradient(180deg, rgba(26, 20, 56, 0.98), rgba(12, 9, 28, 0.98));
+  border: 1.5px solid rgba(255, 215, 106, 0.7);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 24px rgba(255, 157, 60, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 12px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.cw-winner-half-card.enter {
+  animation: cwHalfEnter 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+}
+.cw-winner-half-card.exit {
+  animation: cwHalfExit 0.22s ease-in forwards;
+}
+.cw-winner-half-card.hidden {
+  display: none;
+}
+@keyframes cwHalfEnter {
+  from { transform: translateY(18px) scale(0.92); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes cwHalfExit {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to { transform: translateY(-14px) scale(0.92); opacity: 0; }
+}
+.cw-streak-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  animation: cwPulseGlow 1.4s infinite ease-in-out;
+}
+.cw-streak-pill.pill-fire {
+  background: linear-gradient(135deg, #ff4500, #ff8c00);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 69, 0, 0.8);
+}
+.cw-streak-pill.pill-lightning {
+  background: linear-gradient(135deg, #ffd700, #ff9d00);
+  color: #1a0f00;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.85);
+}
+.cw-streak-pill.pill-godlike {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(236, 72, 153, 0.85);
+}
+@keyframes cwPulseGlow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ============================================================
    REDUCED MOTION
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {

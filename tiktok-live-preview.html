@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Champ Words — TikTok Live Format</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Oxanium:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(130% 100% at 50% 0%, #161138 0%, #0c081e 50%, #060412 100%);
+      font-family: 'Outfit', sans-serif;
+      color: #ffffff;
+    }
+
+    /* Full-screen 9:16 Container */
+    .tiktok-stage {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 16px 20px 16px;
+      justify-content: space-between;
+    }
+
+    /* TikTok Live Stream Top Bar */
+    .live-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 44px;
+      z-index: 10;
+    }
+    .host-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      padding: 4px 12px 4px 5px;
+      backdrop-filter: blur(8px);
+    }
+    .host-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ffd76a, #ff9d3c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      color: #111;
+    }
+    .host-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .host-name {
+      font-size: 11px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+    .live-badge {
+      font-size: 9px;
+      font-weight: 800;
+      color: #ff3b5c;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .live-dot {
+      width: 5px;
+      height: 5px;
+      background: #ff3b5c;
+      border-radius: 50%;
+      animation: pulseDot 1s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .shop-pill {
+      background: linear-gradient(135deg, #ffd76a, #ff9d3c);
+      color: #1a0f00;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 5px 12px;
+      border-radius: 999px;
+      box-shadow: 0 0 10px rgba(255, 215, 106, 0.4);
+    }
+    .viewers-pill {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* Main Game Zone */
+    .game-zone {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+
+    /* 1. TOP 4 LEADERBOARD */
+    .top4-card {
+      background: rgba(20, 16, 46, 0.82);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 10px 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    .top4-header {
+      font-family: 'Oxanium', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .top4-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .top4-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      height: 22px;
+    }
+    .rank-sq {
+      width: 17px;
+      height: 17px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .player-name {
+      font-weight: 700;
+    }
+    .player-score {
+      margin-left: auto;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    /* 2. TIMER & LETTER BRACKETS */
+    .round-timer-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .timer-tag {
+      font-family: 'Oxanium', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 5px 10px;
+      border-radius: 8px;
+      letter-spacing: 1px;
+    }
+    .bracket-slots {
+      display: flex;
+      gap: 5px;
+      flex: 1;
+    }
+    .slot-box {
+      flex: 1;
+      height: 32px;
+      border: 1.5px solid rgba(255, 215, 106, 0.45);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    /* 3. PLAY AREA (4x4 Grid + Clue) */
+    .play-board-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: rgba(20, 16, 44, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 10px;
+      height: 200px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .letter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 4px;
+    }
+    .tile {
+      background: #ffffff;
+      color: #0f0a21;
+      font-family: 'Oxanium', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+      box-shadow: 0 2px 0 #cbd5e1;
+    }
+
+    .clue-stage {
+      background: #110d28;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .traffic-pole {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #231f38;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 2px solid #36304f;
+    }
+    .lamp {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+    }
+    .lamp.red {
+      background: #ff334b;
+      box-shadow: 0 0 12px #ff334b;
+    }
+    .lamp.yellow {
+      background: #ffcc00;
+      opacity: 0.25;
+    }
+    .lamp.green {
+      background: #00e676;
+      opacity: 0.25;
+    }
+    .curtain-reveal {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 50%;
+      background: #24111d;
+      border-left: 2px solid rgba(255, 77, 166, 0.4);
+    }
+
+    /* =========================================================
+       HALF-SCREEN WINNER OVERLAY (Exact Fit Over Middle Board)
+       ========================================================= */
+    .half-winner-popup {
+      position: absolute;
+      top: 185px; /* Aligned exactly over the play board area */
+      left: 0;
+      right: 0;
+      height: 280px;
+      z-index: 100;
+      background: radial-gradient(circle at 50% 15%, rgba(255, 157, 60, 0.45), transparent 70%),
+                  linear-gradient(180deg, rgba(28, 20, 64, 0.98), rgba(12, 9, 28, 0.98));
+      border: 2px solid rgba(255, 215, 106, 0.75);
+      border-radius: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 157, 60, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 14px;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      box-sizing: border-box;
+      animation: halfIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+    }
+
+    @keyframes halfIn {
+      from { transform: translateY(22px) scale(0.92); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .popup-streak-tag {
+      font-size: 12px;
+      font-weight: 900;
+      padding: 5px 16px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #ff4500, #ff8c00);
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(255, 69, 0, 0.85);
+      animation: pulseGlow 1.4s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .winner-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffd76a;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+    .winner-source {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 10px;
+    }
+    .solved-word-chip {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px dashed rgba(255, 215, 106, 0.5);
+      border-radius: 8px;
+      padding: 5px 18px;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      color: #ffd76a;
+      margin-bottom: 12px;
+    }
+    .stats-trio {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .stat-cell {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 6px 2px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .stat-cell b {
+      display: block;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .countdown-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 4px;
+      width: 100%;
+      background: linear-gradient(90deg, #ffd76a, #ff4500);
+      transform-origin: left;
+    }
+
+    /* TikTok Live Chat Feed Section (Bottom Left Flow) */
+    .tiktok-chat-feed {
+      height: 110px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 6px;
+      mask-image: linear-gradient(to top, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+      -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+    }
+    .chat-bubble {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.45);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 11px;
+      backdrop-filter: blur(4px);
+      width: fit-content;
+      max-width: 90%;
+    }
+    .chat-user {
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.65);
+    }
+    .chat-msg {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .chat-msg.correct {
+      color: #38ef7d;
+      font-weight: 800;
+    }
+
+    /* Bottom Control Bar */
+    .bottom-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(20, 16, 48, 0.95);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .input-mock {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 0 12px;
+      height: 38px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.45);
+      display: flex;
+      align-items: center;
+    }
+    .go-btn {
+      background: linear-gradient(135deg, #ffd76a, #ff9d3c);
+      color: #1a0f00;
+      border: none;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 0 18px;
+      height: 38px;
+    }
+    .round-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .round-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .round-pill b {
+      color: #ffd76a;
+    }
+    .progress-line {
+      flex: 1;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-val {
+      width: 30%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff4d94, #ffd76a);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tiktok-stage">
+    
+    <!-- TOP LIVE STREAM HEADER -->
+    <div class="live-top-bar">
+      <div class="host-pill">
+        <div class="host-avatar">CW</div>
+        <div class="host-meta">
+          <div class="host-name">Champ Words Live</div>
+          <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="shop-pill">👑 Shop</div>
+        <div class="viewers-pill">👥 1.8k</div>
+      </div>
+    </div>
+
+    <!-- MAIN GAMEPLAY SECTION -->
+    <div class="game-zone">
+      
+      <!-- TOP 4 LEADERBOARD -->
+      <div class="top4-card">
+        <div class="top4-header">TOP 4</div>
+        <div class="top4-list">
+          <div class="top4-item">
+            <div class="rank-sq" style="background:#ffd76a; color:#111;">1</div>
+            <span class="player-name" style="color:#ffd76a;">AlexPro</span>
+            <span class="player-score">1,420</span>
+          </div>
+          <div class="top4-item">
+            <div class="rank-sq">2</div>
+            <span class="player-name">WordKing</span>
+            <span class="player-score">980</span>
+          </div>
+          <div class="top4-item">
+            <div class="rank-sq">3</div>
+            <span class="player-name">Speedy</span>
+            <span class="player-score">740</span>
+          </div>
+          <div class="top4-item">
+            <div class="rank-sq">4</div>
+            <span class="player-name">Player4</span>
+            <span class="player-score">310</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIMER & BRACKETS -->
+      <div class="round-timer-row">
+        <div class="timer-tag">0:43</div>
+        <div class="bracket-slots">
+          <div class="slot-box"></div>
+          <div class="slot-box"></div>
+          <div class="slot-box"></div>
+          <div class="slot-box"></div>
+          <div class="slot-box"></div>
+          <div class="slot-box"></div>
+          <div class="slot-box"></div>
+        </div>
+      </div>
+
+      <!-- 4x4 GRID & CLUE -->
+      <div class="play-board-row">
+        <div class="letter-grid">
+          <div class="tile">L</div><div class="tile">A</div><div class="tile">R</div><div class="tile">Y</div>
+          <div class="tile">Z</div><div class="tile">J</div><div class="tile">A</div><div class="tile">T</div>
+          <div class="tile">Y</div><div class="tile">V</div><div class="tile">F</div><div class="tile">C</div>
+          <div class="tile">C</div><div class="tile">I</div><div class="tile">F</div><div class="tile">O</div>
+        </div>
+
+        <div class="clue-stage">
+          <div class="traffic-pole">
+            <div class="lamp red"></div>
+            <div class="lamp yellow"></div>
+            <div class="lamp green"></div>
+          </div>
+          <div class="curtain-reveal"></div>
+        </div>
+      </div>
+
+      <!-- ==============================================
+           HALF-SCREEN POPUP OVERLAY (Exact middle placement)
+           ============================================== -->
+      <div class="half-winner-popup">
+        <div class="popup-streak-tag">
+          🔥 ON FIRE! 3 ROUND STREAK! 🔥
+        </div>
+
+        <div class="winner-title">
+          AlexPro
+        </div>
+
+        <div class="winner-source">
+          ⚡ Solved via TikTok Live in 2.1s
+        </div>
+
+        <div class="solved-word-chip">
+          WORD: TRAFFIC
+        </div>
+
+        <div class="stats-trio">
+          <div class="stat-cell">
+            Points
+            <b style="color:#38ef7d">+320</b>
+          </div>
+          <div class="stat-cell">
+            Streak
+            <b style="color:#ff9d3c">3 in a row</b>
+          </div>
+          <div class="stat-cell">
+            Speed
+            <b style="color:#ffd76a">⚡ 2.1s</b>
+          </div>
+        </div>
+
+        <div class="countdown-bar"></div>
+      </div>
+
+    </div>
+
+    <!-- TIKTOK LIVE CHAT STREAM -->
+    <div class="tiktok-chat-feed">
+      <div class="chat-bubble"><span class="chat-user">Emma:</span> <span class="chat-msg">is it light?</span></div>
+      <div class="chat-bubble"><span class="chat-user">Sarah_99:</span> <span class="chat-msg">SIGNAL?</span></div>
+      <div class="chat-bubble"><span class="chat-user">AlexPro:</span> <span class="chat-msg correct">TRAFFIC 🔥</span></div>
+    </div>
+
+    <!-- BOTTOM INPUT & ROUND -->
+    <div class="bottom-bar">
+      <div class="input-row">
+        <div class="input-mock">Or type the answer...</div>
+        <button class="go-btn">GO</button>
+      </div>
+      <div class="round-footer">
+        <div class="round-pill"><b>RD 1</b> / 30</div>
+        <div class="progress-line">
+          <div class="progress-val"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>

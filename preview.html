@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Champ Words — Half-Screen Popup Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Oxanium:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: #060411;
+      background-image: 
+        radial-gradient(circle at 50% 10%, rgba(124, 58, 237, 0.25) 0%, transparent 60%),
+        radial-gradient(circle at 80% 90%, rgba(255, 77, 166, 0.15) 0%, transparent 50%);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 10px;
+      color: #ffffff;
+    }
+
+    /* Floating control bar on top */
+    .controls-panel {
+      margin-bottom: 20px;
+      background: rgba(22, 17, 50, 0.85);
+      border: 1px solid rgba(255, 215, 106, 0.3);
+      padding: 10px 18px;
+      border-radius: 999px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+    }
+    .panel-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffd76a;
+      letter-spacing: 0.5px;
+    }
+    .test-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .test-btn:hover, .test-btn.active {
+      background: linear-gradient(135deg, #ffd76a, #ff9d3c);
+      color: #0f0a24;
+      border-color: #ffd76a;
+      box-shadow: 0 0 12px rgba(255, 157, 60, 0.6);
+    }
+
+    /* Portrait Phone Screen Frame (9:16 aspect ratio) */
+    .screen-container {
+      width: 360px;
+      height: 640px;
+      background: radial-gradient(circle at 50% 0%, #151133 0%, #0d0a1f 100%);
+      border: 3px solid #2a2353;
+      border-radius: 36px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(124, 58, 237, 0.25);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 1. Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 34px;
+      margin-bottom: 8px;
+    }
+    .header-logo {
+      font-family: 'Oxanium', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .header-logo .icon {
+      font-size: 12px;
+      background: #1f1b3e;
+      padding: 2px 4px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .shop-pill {
+      background: linear-gradient(135deg, #ffd76a, #ff9d3c);
+      color: #1a0f00;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .menu-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    /* 2. Top 4 Leaderboard Section */
+    .top4-card {
+      background: rgba(22, 17, 48, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+    }
+    .top4-title {
+      font-family: 'Oxanium', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .top4-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.45);
+      height: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .top4-row:last-child {
+      border-bottom: none;
+    }
+    .rank-badge {
+      width: 15px;
+      height: 15px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    /* 3. Timer & Letter Slots */
+    .timer-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .timer-box {
+      font-family: 'Oxanium', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .slots-row {
+      display: flex;
+      gap: 4px;
+      flex: 1;
+    }
+    .slot {
+      flex: 1;
+      height: 26px;
+      border: 1.5px solid rgba(255, 215, 106, 0.45);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.25);
+    }
+
+    /* 4. Play Area: 4x4 Grid + Clue */
+    .board-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: rgba(20, 16, 44, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 14px;
+      padding: 8px;
+      height: 165px;
+      margin-bottom: 8px;
+    }
+
+    .letter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 3px;
+    }
+    .tile {
+      background: #ffffff;
+      color: #111111;
+      font-family: 'Oxanium', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      box-shadow: 0 2px 0 #cbd5e1;
+    }
+
+    .clue-box {
+      background: #110d28;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .traffic-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #231f38;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 2px solid #36304f;
+    }
+    .light {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+    }
+    .light.red {
+      background: #ff334b;
+      box-shadow: 0 0 10px #ff334b;
+    }
+    .light.yellow {
+      background: #ffcc00;
+      opacity: 0.25;
+    }
+    .light.green {
+      background: #00e676;
+      opacity: 0.25;
+    }
+    .curtain {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 50%;
+      background: #24111d;
+      border-left: 2px solid rgba(255, 77, 166, 0.4);
+    }
+
+    /* 5. Bottom Input */
+    .input-box {
+      background: rgba(22, 17, 48, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-top: auto;
+    }
+    .input-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .input-field {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 0 12px;
+      height: 36px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.45);
+      display: flex;
+      align-items: center;
+    }
+    .go-btn {
+      background: linear-gradient(135deg, #ffd76a, #ff9d3c);
+      color: #1a0f00;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 0 16px;
+      height: 36px;
+      cursor: pointer;
+    }
+    .round-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .round-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .round-pill b {
+      color: #ffd76a;
+    }
+    .progress-track {
+      flex: 1;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      width: 28%;
+      height: 100%;
+      background: linear-gradient(90deg, #ff4d94, #ffd76a);
+    }
+
+    /* =========================================================
+       HALF-SCREEN WINNER OVERLAY (Exact Fit Over Middle Board)
+       ========================================================= */
+    .winner-half-card {
+      position: absolute;
+      top: 232px; /* Positioned directly over the middle play area */
+      left: 14px;
+      right: 14px;
+      height: 250px;
+      z-index: 99;
+      background: radial-gradient(circle at 50% 15%, rgba(255, 157, 60, 0.4), transparent 70%),
+                  linear-gradient(180deg, rgba(28, 21, 60, 0.98), rgba(13, 10, 30, 0.98));
+      border: 1.5px solid rgba(255, 215, 106, 0.7);
+      border-radius: 18px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9), 0 0 24px rgba(255, 157, 60, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 12px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-sizing: border-box;
+      pointer-events: none;
+    }
+
+    .winner-half-card.enter {
+      animation: halfEnter 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+    }
+    .winner-half-card.exit {
+      animation: halfExit 0.22s ease-in forwards;
+    }
+    .winner-half-card.hidden {
+      display: none;
+    }
+
+    @keyframes halfEnter {
+      from { transform: translateY(18px) scale(0.92); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    @keyframes halfExit {
+      from { transform: translateY(0) scale(1); opacity: 1; }
+      to { transform: translateY(-14px) scale(0.92); opacity: 0; }
+    }
+
+    .streak-banner-pill {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 14px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      animation: pulseGlow 1.4s infinite ease-in-out;
+    }
+    .pill-fire {
+      background: linear-gradient(135deg, #ff4500, #ff8c00);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(255, 69, 0, 0.8);
+    }
+    .pill-lightning {
+      background: linear-gradient(135deg, #ffd700, #ff9d00);
+      color: #1a0f00;
+      box-shadow: 0 0 16px rgba(255, 215, 0, 0.85);
+    }
+    .pill-godlike {
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: #ffffff;
+      box-shadow: 0 0 18px rgba(236, 72, 153, 0.85);
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .winner-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #ffd76a;
+      line-height: 1.2;
+    }
+    .winner-source {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 6px;
+    }
+    .solved-word-chip {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px dashed rgba(255, 215, 106, 0.5);
+      border-radius: 6px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffd76a;
+      margin-bottom: 8px;
+    }
+    .stats-trio {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+    .stat-cell {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 5px 2px;
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .stat-cell b {
+      display: block;
+      font-size: 12px;
+      margin-top: 1px;
+    }
+
+    /* 2.2s countdown indicator bar */
+    .countdown-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      width: 100%;
+      background: linear-gradient(90deg, #ffd76a, #ff4500);
+      transform-origin: left;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Test Bar -->
+  <div class="controls-panel">
+    <span class="panel-label">⚡ Trigger Streak:</span>
+    <button class="test-btn active" id="btn-3" onclick="triggerPopup(3)">🔥 3x Fire</button>
+    <button class="test-btn" id="btn-5" onclick="triggerPopup(5)">⚡ 5x Lightning</button>
+    <button class="test-btn" id="btn-7" onclick="triggerPopup(7)">👑 7x Godlike</button>
+  </div>
+
+  <!-- Replicated Portrait Mobile Screen -->
+  <div class="screen-container">
+    
+    <!-- 1. Header -->
+    <div class="header">
+      <div class="header-logo">
+        <span class="icon">CW</span> CHAMP WORDS
+      </div>
+      <div class="header-right">
+        <div class="shop-pill">👑 Shop</div>
+        <div class="menu-pill">☰ Menu</div>
+      </div>
+    </div>
+
+    <!-- 2. Top 4 Leaderboard -->
+    <div class="top4-card">
+      <div class="top4-title">TOP 4</div>
+      <div class="top4-row"><div class="rank-badge">1</div> <span style="color:#ffd76a; font-weight:700;">AlexPro</span> <span style="margin-left:auto; color:#fff;">1,420</span></div>
+      <div class="top4-row"><div class="rank-badge">2</div> <span>WordKing</span> <span style="margin-left:auto; color:#fff;">980</span></div>
+      <div class="top4-row"><div class="rank-badge">3</div> <span>Speedy</span> <span style="margin-left:auto; color:#fff;">740</span></div>
+      <div class="top4-row"><div class="rank-badge">4</div> <span>Player4</span> <span style="margin-left:auto; color:#fff;">310</span></div>
+    </div>
+
+    <!-- 3. Timer & Letter Slots -->
+    <div class="timer-bar">
+      <div class="timer-box">0:43</div>
+      <div class="slots-row">
+        <div class="slot"></div>
+        <div class="slot"></div>
+        <div class="slot"></div>
+        <div class="slot"></div>
+        <div class="slot"></div>
+        <div class="slot"></div>
+        <div class="slot"></div>
+      </div>
+    </div>
+
+    <!-- 4. Play Area: 4x4 Grid + Clue Box -->
+    <div class="board-container">
+      <div class="letter-grid">
+        <div class="tile">L</div><div class="tile">A</div><div class="tile">R</div><div class="tile">Y</div>
+        <div class="tile">Z</div><div class="tile">J</div><div class="tile">A</div><div class="tile">T</div>
+        <div class="tile">Y</div><div class="tile">V</div><div class="tile">F</div><div class="tile">C</div>
+        <div class="tile">C</div><div class="tile">I</div><div class="tile">F</div><div class="tile">O</div>
+      </div>
+
+      <div class="clue-box">
+        <div class="traffic-body">
+          <div class="light red"></div>
+          <div class="light yellow"></div>
+          <div class="light green"></div>
+        </div>
+        <div class="curtain"></div>
+      </div>
+    </div>
+
+    <!-- 5. Bottom Input & Progress -->
+    <div class="input-box">
+      <div class="input-row">
+        <div class="input-field">Or type the answer...</div>
+        <button class="go-btn">GO</button>
+      </div>
+      <div class="round-meta">
+        <div class="round-pill"><b>RD 1</b> / 30</div>
+        <div class="progress-track">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================================
+         HALF-SCREEN POPUP OVERLAY (Exact middle placement)
+         ============================================== -->
+    <div id="winner-popup" class="winner-half-card enter">
+      <div id="streak-pill" class="streak-banner-pill pill-fire">
+        🔥 ON FIRE! 3 ROUND STREAK! 🔥
+      </div>
+
+      <div id="winner-name" class="winner-title">
+        AlexPro
+      </div>
+
+      <div id="winner-source" class="winner-source">
+        ⚡ Solved via TikTok Live in 2.1s
+      </div>
+
+      <div id="winner-word" class="solved-word-chip">
+        WORD: TRAFFIC
+      </div>
+
+      <div class="stats-trio">
+        <div class="stat-cell">
+          Points
+          <b id="stat-pts" style="color:#38ef7d">+320</b>
+        </div>
+        <div class="stat-cell">
+          Streak
+          <b id="stat-streak" style="color:#ff9d3c">3 in a row</b>
+        </div>
+        <div class="stat-cell">
+          Speed
+          <b style="color:#ffd76a">⚡ 2.1s</b>
+        </div>
+      </div>
+
+      <div id="countdown-line" class="countdown-bar"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let timer = null;
+
+    function playAudio(streak) {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = ctx.currentTime;
+        if (streak === 3) {
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+            gain.gain.setValueAtTime(0.2, now + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.36);
+          });
+        } else if (streak === 5) {
+          [440, 554.37, 659.25, 880, 1108.73].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, now + i * 0.09);
+            gain.gain.setValueAtTime(0.16, now + i * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.6);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now + i * 0.09);
+            osc.stop(now + i * 0.09 + 0.62);
+          });
+        } else {
+          [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + i * 0.06);
+            gain.gain.setValueAtTime(0.22, now + i * 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.85);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(now + i * 0.06);
+            osc.stop(now + i * 0.06 + 0.9);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function triggerPopup(streak) {
+      const pop = document.getElementById('winner-popup');
+      const pill = document.getElementById('streak-pill');
+      const pts = document.getElementById('stat-pts');
+      const streakEl = document.getElementById('stat-streak');
+      const line = document.getElementById('countdown-line');
+
+      document.querySelectorAll('.test-btn').forEach(b => b.classList.remove('active'));
+      if (streak === 3) document.getElementById('btn-3').classList.add('active');
+      if (streak === 5) document.getElementById('btn-5').classList.add('active');
+      if (streak === 7) document.getElementById('btn-7').classList.add('active');
+
+      if (timer) clearTimeout(timer);
+
+      if (streak === 3) {
+        pill.className = 'streak-banner-pill pill-fire';
+        pill.textContent = '🔥 ON FIRE! 3 ROUND STREAK! 🔥';
+        pts.textContent = '+320';
+        streakEl.textContent = '3 in a row';
+        streakEl.style.color = '#ff9d3c';
+      } else if (streak === 5) {
+        pill.className = 'streak-banner-pill pill-lightning';
+        pill.textContent = '⚡ UNSTOPPABLE! 5 IN A ROW! ⚡';
+        pts.textContent = '+460';
+        streakEl.textContent = '5 in a row';
+        streakEl.style.color = '#ffd700';
+      } else {
+        pill.className = 'streak-banner-pill pill-godlike';
+        pill.textContent = '👑 GODLIKE! 7+ ROUND DOMINANCE! 👑';
+        pts.textContent = '+650';
+        streakEl.textContent = '7 in a row';
+        streakEl.style.color = '#ec4899';
+      }
+
+      playAudio(streak);
+
+      pop.classList.remove('hidden', 'exit');
+      pop.classList.add('enter');
+
+      // Reset timer countdown animation
+      line.style.animation = 'none';
+      line.offsetHeight;
+      line.style.animation = 'barShrink 2.2s linear forwards';
+
+      // Auto dismiss after 2.2s so the round continues
+      timer = setTimeout(() => {
+        pop.classList.remove('enter');
+        pop.classList.add('exit');
+        setTimeout(() => {
+          pop.classList.add('hidden');
+          pop.classList.remove('exit');
+        }, 220);
+      }, 2200);
+    }
+
+    // Launch immediately on page load
+    triggerPopup(3);
+  </script>
+</body>
+</html>
